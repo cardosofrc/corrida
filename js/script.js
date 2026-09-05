@@ -68,7 +68,7 @@ formulario.addEventListener(
                 <br><br>
 
                 Valor:
-                <strong>R$ 60,00</strong>
+                <strong>R$ 50,00</strong>
 
                 <br><br>
 
