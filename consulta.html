@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Consultar Inscrição | Correndo com Nossa Senhora</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: linear-gradient(135deg, #f4f8ff, #ffffff);
+            min-height: 100vh;
+            color: #1f2937;
+        }
+
+        header {
+            background: #0d47a1;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 25px;
+            margin-bottom: 6px;
+        }
+
+        header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 45px auto;
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 18px;
+            padding: 30px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.10);
+        }
+
+        .card h2 {
+            text-align: center;
+            color: #0d47a1;
+            margin-bottom: 10px;
+        }
+
+        .descricao {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        .campo {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 7px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 13px;
+            border: 1px solid #ccc;
+            border-radius: 9px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #0d47a1;
+        }
+
+        button {
+            width: 100%;
+            border: none;
+            border-radius: 9px;
+            padding: 14px;
+            background: #0d47a1;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background: #083b8a;
+        }
+
+        button:disabled {
+            opacity: 0.7;
+            cursor: wait;
+        }
+
+        #mensagem {
+            margin-top: 20px;
+        }
+
+        .resultado {
+            background: #f5f9ff;
+            border: 1px solid #d8e6ff;
+            border-radius: 12px;
+            padding: 20px;
+            line-height: 1.8;
+        }
+
+        .resultado h3 {
+            color: #0d47a1;
+            margin-bottom: 10px;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .status-pendente {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-confirmado {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-cancelado {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .erro {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .voltar {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #0d47a1;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        @media (max-width: 500px) {
+            .container {
+                margin: 20px auto;
+            }
+
+            .card {
+                padding: 22px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>Correndo com Nossa Senhora</h1>
+    <p>18 de dezembro de 2026 • Buriti dos Lopes - PI</p>
+</header>
+
+<div class="container">
+
+    <div class="card">
+
+        <h2>Consultar Inscrição</h2>
+
+        <p class="descricao">
+            Informe seu CPF e sua data de nascimento para consultar
+            a situação da sua inscrição.
+        </p>
+
+        <form id="formConsulta">
+
+            <div class="campo">
+                <label for="cpf">CPF</label>
+                <input
+                    type="text"
+                    id="cpf"
+                    maxlength="14"
+                    placeholder="000.000.000-00"
+                    required
+                >
+            </div>
+
+            <div class="campo">
+                <label for="nascimento">Data de nascimento</label>
+                <input
+                    type="date"
+                    id="nascimento"
+                    required
+                >
+            </div>
+
+            <button type="submit" id="btnConsultar">
+                Consultar inscrição
+            </button>
+
+        </form>
+
+        <div id="mensagem"></div>
+
+        <a href="index.html" class="voltar">
+            ← Voltar para a página de inscrição
+        </a>
+
+    </div>
+
+</div>
+
+<script>
+
+const SUPABASE_URL =
+    "https://bsadzpxcxoeutockphjm.supabase.co";
+
+const SUPABASE_KEY =
+    "sb_publishable_2eNohK0WFyzO2R0Adx9-tg_e_WTPaQv";
+
+const form = document.getElementById("formConsulta");
+const mensagem = document.getElementById("mensagem");
+const btnConsultar = document.getElementById("btnConsultar");
+
+const cpfInput = document.getElementById("cpf");
+
+
+// Máscara simples de CPF
+cpfInput.addEventListener("input", function () {
+
+    let valor = this.value.replace(/\D/g, "");
+
+    if (valor.length > 11) {
+        valor = valor.substring(0, 11);
+    }
+
+    valor = valor.replace(
+        /(\d{3})(\d)/,
+        "$1.$2"
+    );
+
+    valor = valor.replace(
+        /(\d{3})(\d)/,
+        "$1.$2"
+    );
+
+    valor = valor.replace(
+        /(\d{3})(\d{1,2})$/,
+        "$1-$2"
+    );
+
+    this.value = valor;
+});
+
+
+form.addEventListener("submit", async function (event) {
+
+    event.preventDefault();
+
+    mensagem.innerHTML = "";
+
+    btnConsultar.disabled = true;
+    btnConsultar.textContent = "Consultando...";
+
+    const cpf = cpfInput.value;
+    const nascimento =
+        document.getElementById("nascimento").value;
+
+    try {
+
+        const resposta = await fetch(
+            `${SUPABASE_URL}/rest/v1/rpc/consultar_inscricao`,
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json",
+                    "apikey": SUPABASE_KEY,
+                    "Authorization":
+                        `Bearer ${SUPABASE_KEY}`
+                },
+
+                body: JSON.stringify({
+                    p_cpf: cpf,
+                    p_data_nascimento: nascimento
+                })
+            }
+        );
+
+        const dados = await resposta.json();
+
+        if (!resposta.ok) {
+
+            throw new Error(
+                dados.message ||
+                dados.error ||
+                "Não foi possível consultar a inscrição."
+            );
+        }
+
+        if (!dados || dados.length === 0) {
+
+            mensagem.innerHTML = `
+                <div class="erro">
+                    <strong>Inscrição não encontrada.</strong><br>
+                    Confira o CPF e a data de nascimento informados.
+                </div>
+            `;
+
+            return;
+        }
+
+        const inscricao = dados[0];
+
+        let classeStatus = "status-pendente";
+
+        if (inscricao.status_pagamento === "CONFIRMADO") {
+            classeStatus = "status-confirmado";
+        }
+
+        if (inscricao.status_pagamento === "CANCELADO") {
+            classeStatus = "status-cancelado";
+        }
+
+        mensagem.innerHTML = `
+            <div class="resultado">
+
+                <h3>Inscrição encontrada!</h3>
+
+                <strong>Protocolo:</strong>
+                ${inscricao.protocolo}
+                <br>
+
+                <strong>Participante:</strong>
+                ${inscricao.nome}
+                <br>
+
+                <strong>Percurso:</strong>
+                ${inscricao.percurso}
+                <br>
+
+                <strong>Camisa:</strong>
+                ${inscricao.tamanho_camisa}
+                <br>
+
+                <strong>Valor:</strong>
+                R$ ${Number(inscricao.valor)
+                    .toFixed(2)
+                    .replace(".", ",")}
+                <br>
+
+                <strong>Status:</strong><br>
+
+                <span class="status ${classeStatus}">
+                    ${inscricao.status_pagamento}
+                </span>
+
+            </div>
+        `;
+
+    } catch (erro) {
+
+        console.error(erro);
+
+        mensagem.innerHTML = `
+            <div class="erro">
+                Ocorreu um erro ao consultar sua inscrição.
+                Tente novamente.
+            </div>
+        `;
+
+    } finally {
+
+        btnConsultar.disabled = false;
+        btnConsultar.textContent =
+            "Consultar inscrição";
+    }
+
+});
+
+</script>
+
+</body>
+</html>

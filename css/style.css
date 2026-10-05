@@ -403,6 +403,28 @@ select:focus {
     font-size: 0.9rem;
 }
 
+.consulta-inscricao {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.btn-consulta {
+    display: inline-block;
+    padding: 13px 22px;
+    background: #ffffff;
+    color: #0d47a1;
+    border: 2px solid #0d47a1;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: 0.2s ease;
+}
+
+.btn-consulta:hover {
+    background: #0d47a1;
+    color: #ffffff;
+}
+
 /* =========================
            RODAPÉ
         ========================== */
