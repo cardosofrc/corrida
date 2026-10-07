@@ -38,7 +38,12 @@ header {
     top: 0;
     z-index: 1000;
     background: rgba(255, 255, 255, 0.97);
+    /* background-image: url(/img/fundo.jpeg); */
     border-bottom: 1px solid #e5e7eb;
+}
+
+header img{
+    width: 20%;
 }
 
 .navbar {
@@ -256,7 +261,8 @@ section {
 }
 
 .info-inscricao {
-    background: var(--azul-escuro);
+    /* background: var(--azul-escuro); */
+    background-image: url(/img/fundo.jpeg);
     color: white;
     border-radius: 25px;
     padding: 35px;

@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Painel Administrativo | Correndo com Nossa Senhora</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f3f6fb;
+            color: #1f2937;
+        }
+
+        header {
+            background: #0d47a1;
+            color: white;
+            padding: 18px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        header h1 {
+            font-size: 22px;
+        }
+
+        header p {
+            font-size: 13px;
+            opacity: 0.9;
+            margin-top: 4px;
+        }
+
+        #btnSair {
+            background: #ffffff;
+            color: #0d47a1;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 14px;
+            padding: 25px;
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+        }
+
+        .login {
+            max-width: 430px;
+            margin: 80px auto;
+        }
+
+        .login h2 {
+            text-align: center;
+            color: #0d47a1;
+            margin-bottom: 20px;
+        }
+
+        .campo {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 7px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        .btn-principal {
+            width: 100%;
+            background: #0d47a1;
+            color: white;
+            border: none;
+            padding: 13px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: bold;
+        }
+
+        .btn-principal:hover {
+            background: #083b8a;
+        }
+
+        .mensagem {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .erro {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .sucesso {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .painel-topo {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .indicador {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.06);
+        }
+
+        .indicador span {
+            display: block;
+            color: #666;
+            font-size: 13px;
+        }
+
+        .indicador strong {
+            display: block;
+            font-size: 28px;
+            color: #0d47a1;
+            margin-top: 5px;
+        }
+
+        .filtros {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr auto;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .btn-atualizar {
+            background: #0d47a1;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 11px 18px;
+            font-weight: bold;
+        }
+
+        .tabela-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 900px;
+        }
+
+        th {
+            background: #0d47a1;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-size: 13px;
+        }
+
+        td {
+            padding: 11px;
+            border-bottom: 1px solid #eee;
+            font-size: 13px;
+        }
+
+        tr:hover {
+            background: #f7faff;
+        }
+
+        .status {
+            padding: 5px 9px;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 11px;
+        }
+
+        .pendente {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .confirmado {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .cancelado {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .btn-status {
+            border: none;
+            border-radius: 6px;
+            padding: 7px 10px;
+            font-size: 12px;
+            font-weight: bold;
+            margin: 2px;
+        }
+
+        .btn-confirmar {
+            background: #198754;
+            color: white;
+        }
+
+        .btn-cancelar {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-pendente {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        #areaPainel {
+            display: none;
+        }
+
+        @media (max-width: 900px) {
+            .painel-topo {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .filtros {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 500px) {
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .painel-topo {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div>
+            <h1>Correndo com Nossa Senhora</h1>
+            <p>Painel Administrativo</p>
+        </div>
+
+        <button id="btnSair">Sair</button>
+    </header>
+
+
+    <!-- LOGIN -->
+
+    <div id="areaLogin" class="container">
+
+        <div class="card login">
+
+            <h2>🔐 Acesso administrativo</h2>
+
+            <form id="formLogin">
+
+                <div class="campo">
+                    <label for="email">E-mail</label>
+                    <input type="email" id="email" required autocomplete="username">
+                </div>
+
+                <div class="campo">
+                    <label for="senha">Senha</label>
+                    <input type="password" id="senha" required autocomplete="current-password">
+                </div>
+
+                <button class="btn-principal" type="submit">
+                    Entrar
+                </button>
+
+            </form>
+
+            <div id="mensagemLogin" class="mensagem"></div>
+
+        </div>
+
+    </div>
+
+
+    <!-- PAINEL -->
+
+    <div id="areaPainel">
+
+        <div class="container">
+
+            <div class="painel-topo">
+
+                <div class="indicador">
+                    <span>Total de inscrições</span>
+                    <strong id="totalInscricoes">0</strong>
+                </div>
+
+                <div class="indicador">
+                    <span>Pendentes</span>
+                    <strong id="totalPendentes">0</strong>
+                </div>
+
+                <div class="indicador">
+                    <span>Confirmadas</span>
+                    <strong id="totalConfirmadas">0</strong>
+                </div>
+
+                <div class="indicador">
+                    <span>Canceladas</span>
+                    <strong id="totalCanceladas">0</strong>
+                </div>
+
+            </div>
+
+
+            <div class="card">
+
+                <h2 style="margin-bottom: 18px;">
+                    Inscrições
+                </h2>
+
+                <div class="filtros">
+
+                    <input type="text" id="busca" placeholder="Buscar por nome, CPF ou protocolo">
+
+                    <select id="filtroPercurso">
+                        <option value="">Todos os percursos</option>
+                        <option value="3 km">3 km</option>
+                        <option value="5 km">5 km</option>
+                    </select>
+
+                    <select id="filtroStatus">
+                        <option value="">Todos os status</option>
+                        <option value="PENDENTE">Pendente</option>
+                        <option value="CONFIRMADO">Confirmado</option>
+                        <option value="CANCELADO">Cancelado</option>
+                    </select>
+
+                    <button class="btn-atualizar" onclick="carregarInscricoes()">
+                        Atualizar
+                    </button>
+
+                </div>
+
+
+                <div class="tabela-container">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+                                <th>Protocolo</th>
+                                <th>Nome</th>
+                                <th>CPF</th>
+                                <th>Percurso</th>
+                                <th>Camisa</th>
+                                <th>Telefone</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="tabelaInscricoes"></tbody>
+
+                    </table>
+
+                </div>
+
+                <div id="mensagemPainel" class="mensagem"></div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <script>
+
+        const SUPABASE_URL =
+            "https://bsadzpxcxoeutockphjm.supabase.co";
+
+        const SUPABASE_KEY =
+            "sb_publishable_2eNohK0WFyzO2R0Adx9-tg_e_WTPaQv";
+
+
+        const areaLogin =
+            document.getElementById("areaLogin");
+
+        const areaPainel =
+            document.getElementById("areaPainel");
+
+        const mensagemLogin =
+            document.getElementById("mensagemLogin");
+
+        const tabela =
+            document.getElementById("tabelaInscricoes");
+
+
+        let sessaoAtual = null;
+        let inscricoes = [];
+
+
+        /* =========================
+           LOGIN
+        ========================= */
+
+        document
+            .getElementById("formLogin")
+            .addEventListener("submit", async function (event) {
+
+                event.preventDefault();
+
+                mensagemLogin.style.display = "none";
+
+                const email =
+                    document.getElementById("email").value.trim();
+
+                const senha =
+                    document.getElementById("senha").value;
+
+                try {
+
+                    const resposta = await fetch(
+                        `${SUPABASE_URL}/auth/v1/token?grant_type=password`,
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type": "application/json",
+                                "apikey": SUPABASE_KEY
+                            },
+
+                            body: JSON.stringify({
+                                email: email,
+                                password: senha
+                            })
+                        }
+                    );
+
+                    const dados = await resposta.json();
+
+                    if (!resposta.ok) {
+                        throw new Error(
+                            dados.error_description ||
+                            dados.msg ||
+                            "E-mail ou senha inválidos."
+                        );
+                    }
+
+                    sessaoAtual = dados;
+
+                    sessionStorage.setItem(
+                        "admin_access_token",
+                        dados.access_token
+                    );
+
+                    sessionStorage.setItem(
+                        "admin_refresh_token",
+                        dados.refresh_token
+                    );
+
+                    await verificarAdministrador();
+
+                } catch (erro) {
+
+                    mensagemLogin.textContent = erro.message;
+                    mensagemLogin.className = "mensagem erro";
+                    mensagemLogin.style.display = "block";
+                }
+
+            });
+
+
+        /* =========================
+           VERIFICAR ADMIN
+        ========================= */
+
+        async function verificarAdministrador() {
+
+            const token =
+                sessionStorage.getItem("admin_access_token");
+
+            if (!token) {
+                mostrarLogin();
+                return;
+            }
+
+            try {
+
+                const resposta = await fetch(
+                    `${SUPABASE_URL}/rest/v1/rpc/is_admin`,
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type": "application/json",
+                            "apikey": SUPABASE_KEY,
+                            "Authorization": `Bearer ${token}`
+                        }
+                    }
+                );
+
+                const ehAdmin = await resposta.json();
+
+                if (!resposta.ok || ehAdmin !== true) {
+
+                    sessionStorage.clear();
+
+                    throw new Error(
+                        "Este usuário não possui permissão administrativa."
+                    );
+                }
+
+                mostrarPainel();
+
+            } catch (erro) {
+
+                mensagemLogin.textContent = erro.message;
+                mensagemLogin.className = "mensagem erro";
+                mensagemLogin.style.display = "block";
+
+                mostrarLogin();
+            }
+        }
+
+
+        /* =========================
+           MOSTRAR PAINEL
+        ========================= */
+
+        function mostrarPainel() {
+
+            areaLogin.style.display = "none";
+            areaPainel.style.display = "block";
+
+            carregarInscricoes();
+        }
+
+
+        /* =========================
+           MOSTRAR LOGIN
+        ========================= */
+
+        function mostrarLogin() {
+
+            areaLogin.style.display = "block";
+            areaPainel.style.display = "none";
+        }
+
+
+        /* =========================
+           CARREGAR INSCRIÇÕES
+        ========================= */
+
+        async function carregarInscricoes() {
+
+            const token =
+                sessionStorage.getItem("admin_access_token");
+
+            if (!token) {
+                mostrarLogin();
+                return;
+            }
+
+            try {
+
+                const resposta = await fetch(
+                    `${SUPABASE_URL}/rest/v1/inscricoes?select=*`,
+                    {
+                        method: "GET",
+
+                        headers: {
+                            "apikey": SUPABASE_KEY,
+                            "Authorization": `Bearer ${token}`
+                        }
+                    }
+                );
+
+                const dados = await resposta.json();
+
+                if (!resposta.ok) {
+
+                    throw new Error(
+                        dados.message ||
+                        "Não foi possível carregar as inscrições."
+                    );
+                }
+
+                inscricoes = dados;
+
+                atualizarIndicadores();
+                aplicarFiltros();
+
+            } catch (erro) {
+
+                mostrarMensagemPainel(
+                    erro.message,
+                    "erro"
+                );
+            }
+        }
+
+
+        /* =========================
+           INDICADORES
+        ========================= */
+
+        function atualizarIndicadores() {
+
+            document.getElementById(
+                "totalInscricoes"
+            ).textContent = inscricoes.length;
+
+            document.getElementById(
+                "totalPendentes"
+            ).textContent =
+                inscricoes.filter(
+                    i => i.status_pagamento === "PENDENTE"
+                ).length;
+
+            document.getElementById(
+                "totalConfirmadas"
+            ).textContent =
+                inscricoes.filter(
+                    i => i.status_pagamento === "CONFIRMADO"
+                ).length;
+
+            document.getElementById(
+                "totalCanceladas"
+            ).textContent =
+                inscricoes.filter(
+                    i => i.status_pagamento === "CANCELADO"
+                ).length;
+        }
+
+
+        /* =========================
+           FILTROS
+        ========================= */
+
+        document
+            .getElementById("busca")
+            .addEventListener("input", aplicarFiltros);
+
+        document
+            .getElementById("filtroPercurso")
+            .addEventListener("change", aplicarFiltros);
+
+        document
+            .getElementById("filtroStatus")
+            .addEventListener("change", aplicarFiltros);
+
+
+        function aplicarFiltros() {
+
+            const busca =
+                document.getElementById("busca")
+                    .value
+                    .toLowerCase()
+                    .trim();
+
+            const percurso =
+                document.getElementById("filtroPercurso").value;
+
+            const status =
+                document.getElementById("filtroStatus").value;
+
+
+            const resultado =
+                inscricoes.filter(inscricao => {
+
+                    const correspondeBusca =
+                        !busca ||
+                        inscricao.nome
+                            .toLowerCase()
+                            .includes(busca) ||
+                        inscricao.cpf
+                            .toLowerCase()
+                            .includes(busca) ||
+                        inscricao.protocolo
+                            .toLowerCase()
+                            .includes(busca);
+
+                    const correspondePercurso =
+                        !percurso ||
+                        inscricao.percurso === percurso;
+
+                    const correspondeStatus =
+                        !status ||
+                        inscricao.status_pagamento === status;
+
+                    return (
+                        correspondeBusca &&
+                        correspondePercurso &&
+                        correspondeStatus
+                    );
+
+                });
+
+            renderizarTabela(resultado);
+        }
+
+
+        /* =========================
+           TABELA
+        ========================= */
+
+        function renderizarTabela(lista) {
+
+            tabela.innerHTML = "";
+
+            if (lista.length === 0) {
+
+                tabela.innerHTML = `
+            <tr>
+                <td colspan="8" style="text-align:center;">
+                    Nenhuma inscrição encontrada.
+                </td>
+            </tr>
+        `;
+
+                return;
+            }
+
+
+            lista.forEach(inscricao => {
+
+                const tr =
+                    document.createElement("tr");
+
+                let classeStatus =
+                    "pendente";
+
+                if (
+                    inscricao.status_pagamento ===
+                    "CONFIRMADO"
+                ) {
+                    classeStatus = "confirmado";
+                }
+
+                if (
+                    inscricao.status_pagamento ===
+                    "CANCELADO"
+                ) {
+                    classeStatus = "cancelado";
+                }
+
+
+                tr.innerHTML = `
+
+            <td>${inscricao.protocolo}</td>
+
+            <td>${inscricao.nome}</td>
+
+            <td>${inscricao.cpf}</td>
+
+            <td>${inscricao.percurso}</td>
+
+            <td>${inscricao.tamanho_camisa}</td>
+
+            <td>${inscricao.telefone}</td>
+
+            <td>
+                <span class="status ${classeStatus}">
+                    ${inscricao.status_pagamento}
+                </span>
+            </td>
+
+            <td>
+
+                ${inscricao.status_pagamento !==
+                        "CONFIRMADO"
+
+                        ? `
+                    <button
+                        class="btn-status btn-confirmar"
+                        onclick="alterarStatus(
+                            '${inscricao.id}',
+                            'CONFIRMADO'
+                        )"
+                    >
+                        Confirmar
+                    </button>
+                    `
+                        : ""
+                    }
+
+
+                ${inscricao.status_pagamento !==
+                        "PENDENTE"
+
+                        ? `
+                    <button
+                        class="btn-status btn-pendente"
+                        onclick="alterarStatus(
+                            '${inscricao.id}',
+                            'PENDENTE'
+                        )"
+                    >
+                        Pendente
+                    </button>
+                    `
+                        : ""
+                    }
+
+
+                ${inscricao.status_pagamento !==
+                        "CANCELADO"
+
+                        ? `
+                    <button
+                        class="btn-status btn-cancelar"
+                        onclick="alterarStatus(
+                            '${inscricao.id}',
+                            'CANCELADO'
+                        )"
+                    >
+                        Cancelar
+                    </button>
+                    `
+                        : ""
+                    }
+
+            </td>
+        `;
+
+                tabela.appendChild(tr);
+            });
+        }
+
+
+        /* =========================
+           ALTERAR STATUS
+        ========================= */
+
+        async function alterarStatus(id, novoStatus) {
+
+            const confirmacao =
+                confirm(
+                    `Deseja realmente alterar o status para ${novoStatus}?`
+                );
+
+            if (!confirmacao) {
+                return;
+            }
+
+
+            const token =
+                sessionStorage.getItem(
+                    "admin_access_token"
+                );
+
+
+            try {
+
+                const resposta = await fetch(
+                    `${SUPABASE_URL}/rest/v1/inscricoes?id=eq.${id}`,
+                    {
+                        method: "PATCH",
+
+                        headers: {
+                            "apikey": SUPABASE_KEY,
+                            "Authorization": `Bearer ${token}`,
+                            "Content-Type":
+                                "application/json",
+                            "Prefer":
+                                "return=minimal"
+                        },
+
+                        body: JSON.stringify({
+                            status_pagamento:
+                                novoStatus
+                        })
+                    }
+                );
+
+
+                if (!resposta.ok) {
+
+                    const erro =
+                        await resposta.json();
+
+                    throw new Error(
+                        erro.message ||
+                        "Não foi possível alterar o status."
+                    );
+                }
+
+
+                await carregarInscricoes();
+
+                mostrarMensagemPainel(
+                    "Status atualizado com sucesso.",
+                    "sucesso"
+                );
+
+            } catch (erro) {
+
+                mostrarMensagemPainel(
+                    erro.message,
+                    "erro"
+                );
+            }
+        }
+
+
+        /* =========================
+           MENSAGENS
+        ========================= */
+
+        function mostrarMensagemPainel(
+            texto,
+            tipo
+        ) {
+
+            const elemento =
+                document.getElementById(
+                    "mensagemPainel"
+                );
+
+            elemento.textContent = texto;
+
+            elemento.className =
+                `mensagem ${tipo}`;
+
+            elemento.style.display = "block";
+
+            setTimeout(() => {
+                elemento.style.display = "none";
+            }, 4000);
+        }
+
+
+        /* =========================
+           SAIR
+        ========================= */
+
+        document
+            .getElementById("btnSair")
+            .addEventListener("click", function () {
+
+                sessionStorage.clear();
+
+                mostrarLogin();
+
+            });
+
+
+        /* =========================
+           VERIFICAR SESSÃO AO ABRIR
+        ========================= */
+
+        verificarAdministrador();
+
+    </script>
+
+</body>
+
+</html>
