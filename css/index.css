@@ -53,6 +53,30 @@ nav a:hover {
     color: var(--azul);
 }
 
+.network{
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+    padding: 3px;
+    border-radius: 10px;
+    background-color: var(--azul-claro);
+    box-shadow: 0 0 2px rgba(0, 0, 0);
+    font-size: 12px;
+    color: var(--azul);
+}
+
+.network-details{
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    font-size: 1.0rem;
+}
+
+.network-details a{
+    color: var(--azul);
+}
+
+
 /* =========================
            HERO
         ========================== */
@@ -405,6 +429,8 @@ select:focus {
     color: #ffffff;
 }
 
+
+
 /* =========================
            RODAPÉ
         ========================== */
@@ -454,6 +480,7 @@ footer .gold {
         margin-left: 0;
         margin-top: 10px;
     }
+
 }
 
 @media (max-width: 500px) {
