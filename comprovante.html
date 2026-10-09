@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Envio do comprovante de pagamento da Correndo com Nossa Senhora."
+    />
+    <title>Enviar comprovante | Correndo com Nossa Senhora</title>
+    <style>
+      :root {
+        --blue: #0d47a1;
+        --dark: #093579;
+        --gold: #c79b35;
+        --bg: #f4f7fb;
+        --text: #1d2939;
+        --muted: #667085;
+        --border: #d7dfeb;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        color: var(--text);
+        background: linear-gradient(180deg, #eaf1fb 0, var(--bg) 270px);
+        min-height: 100vh;
+      }
+      header {
+        background: var(--blue);
+        color: #fff;
+        padding: 22px 16px;
+        text-align: center;
+        border-bottom: 4px solid var(--gold);
+      }
+      header .brand {
+        font-size: 1.25rem;
+        font-weight: 800;
+      }
+      header p {
+        margin: 8px 0 0;
+        color: #e8efff;
+      }
+      main {
+        width: min(680px, calc(100% - 28px));
+        margin: 32px auto;
+      }
+      .card {
+        background: #fff;
+        border: 1px solid #e4e9f2;
+        border-radius: 16px;
+        padding: clamp(20px, 4vw, 34px);
+        box-shadow: 0 10px 30px rgba(21, 48, 88, 0.08);
+      }
+      h1 {
+        font-size: clamp(1.45rem, 4vw, 2rem);
+        margin: 0 0 10px;
+        color: var(--dark);
+      }
+      .intro {
+        color: var(--muted);
+        line-height: 1.55;
+        margin: 0 0 24px;
+      }
+      .notice {
+        background: #fff8e8;
+        border: 1px solid #f0d89b;
+        border-radius: 10px;
+        padding: 13px 15px;
+        line-height: 1.5;
+        font-size: 0.94rem;
+        margin-bottom: 22px;
+      }
+      label {
+        display: block;
+        font-weight: 700;
+        margin: 17px 0 7px;
+      }
+      input {
+        display: block;
+        width: 100%;
+        min-height: 46px;
+        border: 1px solid var(--border);
+        border-radius: 9px;
+        padding: 11px 12px;
+        font: inherit;
+        background: #fff;
+      }
+      input:focus {
+        outline: 3px solid rgba(13, 71, 161, 0.14);
+        border-color: var(--blue);
+      }
+      input[type="file"] {
+        padding: 9px;
+      }
+      .hint {
+        color: var(--muted);
+        font-size: 0.86rem;
+        margin: 7px 0 0;
+        line-height: 1.4;
+      }
+      button {
+        width: 100%;
+        min-height: 48px;
+        margin-top: 24px;
+        border: 0;
+        border-radius: 10px;
+        background: var(--blue);
+        color: white;
+        font-size: 1rem;
+        font-weight: 800;
+        cursor: pointer;
+        padding: 12px 18px;
+      }
+      button:hover {
+        background: var(--dark);
+      }
+      button:disabled {
+        opacity: 0.65;
+        cursor: wait;
+      }
+      #mensagem {
+        display: none;
+        margin-top: 18px;
+        padding: 13px 15px;
+        border-radius: 9px;
+        line-height: 1.5;
+      }
+      #mensagem.sucesso {
+        display: block;
+        color: #175c32;
+        background: #eaf8ef;
+        border: 1px solid #b7e3c5;
+      }
+      #mensagem.erro {
+        display: block;
+        color: #8a2424;
+        background: #fff0f0;
+        border: 1px solid #f1c0c0;
+      }
+      .back {
+        display: inline-block;
+        margin-top: 20px;
+        color: var(--blue);
+        font-weight: 700;
+        text-decoration: none;
+      }
+      .back:hover {
+        text-decoration: underline;
+      }
+      footer {
+        text-align: center;
+        color: var(--muted);
+        font-size: 0.85rem;
+        padding: 0 16px 26px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="brand">1ª Corrida de Nossa Senhora dos Remédios</div>
+      <p>Envio do comprovante de pagamento</p>
+    </header>
+    <main>
+      <section class="card">
+        <h1>Enviar comprovante do PIX</h1>
+        <p class="intro">
+          Informe o protocolo e o CPF usados na inscrição e anexe o comprovante
+          para que a organização possa conferir o pagamento.
+        </p>
+        <div class="notice">
+          <strong>Atenção:</strong> o envio do comprovante não confirma
+          automaticamente a inscrição. O status continuará
+          <strong>PENDENTE</strong> até a conferência pela organização do
+          evento.
+        </div>
+        <form id="formComprovante">
+          <label for="protocolo">Protocolo da inscrição *</label>
+          <input
+            id="protocolo"
+            name="protocolo"
+            type="text"
+            placeholder="Ex.: CNS-2026-000123"
+            autocomplete="off"
+            required
+            maxlength="40"
+          />
+          <label for="cpf">CPF do participante *</label>
+          <input
+            id="cpf"
+            name="cpf"
+            type="text"
+            inputmode="numeric"
+            placeholder="000.000.000-00"
+            autocomplete="off"
+            required
+            maxlength="14"
+          />
+          <label for="arquivo">Comprovante do PIX *</label>
+          <input
+            id="arquivo"
+            name="arquivo"
+            type="file"
+            accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
+            required
+          />
+          <p class="hint">
+            Formatos aceitos: JPG, PNG ou PDF. Tamanho máximo: 5 MB.
+          </p>
+          <button id="btnEnviar" type="submit">ENVIAR COMPROVANTE</button>
+          <div id="mensagem" role="status" aria-live="polite"></div>
+        </form>
+        <a class="back" href="index.html">← Voltar ao site do evento</a>
+      </section>
+    </main>
+    <footer>Correndo com Nossa Senhora · Buriti dos Lopes – PI · 2026</footer>
+    <script>
+      const SUPABASE_URL = "https://bsadzpxcxoeutockphjm.supabase.co";
+      const SUPABASE_PUBLISHABLE_KEY =
+        "sb_publishable_2eNohK0WFyzO2R0Adx9-tg_e_WTPaQv";
+      const FUNCTION_URL = `${SUPABASE_URL}/functions/v1/enviar-comprovante`;
+      const form = document.getElementById("formComprovante");
+      const cpfInput = document.getElementById("cpf");
+      const fileInput = document.getElementById("arquivo");
+      const button = document.getElementById("btnEnviar");
+      const message = document.getElementById("mensagem");
+
+      cpfInput.addEventListener("input", () => {
+        const digits = cpfInput.value.replace(/\D/g, "").slice(0, 11);
+        cpfInput.value = digits
+          .replace(/^(\d{3})(\d)/, "$1.$2")
+          .replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
+          .replace(/\.(\d{3})(\d)/, ".$1-$2");
+      });
+      function showMessage(text, type) {
+        message.textContent = text;
+        message.className = type;
+      }
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        message.className = "";
+        message.textContent = "";
+        const protocolo = document.getElementById("protocolo").value.trim();
+        const cpf = cpfInput.value.replace(/\D/g, "");
+        const file = fileInput.files[0];
+        if (!protocolo || cpf.length !== 11 || !file) {
+          showMessage(
+            "Informe o protocolo, o CPF com 11 dígitos e selecione o comprovante.",
+            "erro",
+          );
+          return;
+        }
+        if (
+          !["image/jpeg", "image/png", "application/pdf"].includes(file.type)
+        ) {
+          showMessage("Formato não permitido. Envie JPG, PNG ou PDF.", "erro");
+          return;
+        }
+        if (file.size === 0 || file.size > 5 * 1024 * 1024) {
+          showMessage(
+            "O arquivo deve ter tamanho entre 1 byte e 5 MB.",
+            "erro",
+          );
+          return;
+        }
+        const data = new FormData();
+        data.append("protocolo", protocolo);
+        data.append("cpf", cpf);
+        data.append("arquivo", file);
+        button.disabled = true;
+        button.textContent = "ENVIANDO...";
+        try {
+          const response = await fetch(FUNCTION_URL, {
+            method: "POST",
+            headers: {
+              apikey: SUPABASE_PUBLISHABLE_KEY,
+              Authorization: `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
+            },
+            body: data,
+          });
+          const result = await response.json().catch(() => ({}));
+          if (!response.ok) {
+            if (response.status === 401 || response.status === 403) {
+              throw new Error(
+                "A função ainda precisa ser configurada para aceitar envios públicos com segurança. Nenhum comprovante foi confirmado.",
+              );
+            }
+            throw new Error(
+              result.erro ||
+                "Não foi possível enviar o comprovante. Tente novamente.",
+            );
+          }
+          showMessage(
+            `${result.mensagem || "Comprovante recebido."}${result.protocolo ? " Protocolo: " + result.protocolo + "." : ""}`,
+            "sucesso",
+          );
+          form.reset();
+        } catch (error) {
+          showMessage(
+            error.message || "Falha de conexão. Tente novamente.",
+            "erro",
+          );
+        } finally {
+          button.disabled = false;
+          button.textContent = "ENVIAR COMPROVANTE";
+        }
+      });
+    </script>
+  </body>
+</html>

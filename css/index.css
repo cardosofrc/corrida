@@ -1,33 +1,7 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-:root {
-    --azul-escuro: #12385b;
-    --azul: #2878b8;
-    --azul-claro: #eaf4fb;
-    --dourado: #d4af37;
-    --dourado-claro: #f4df91;
-    --branco: #ffffff;
-    --cinza: #f5f7fa;
-    --texto: #243447;
-    --cinza-texto: #64748b;
-    --verde: #198754;
-    --sombra: 0 10px 35px rgba(18, 56, 91, 0.12);
-}
-
 html {
     scroll-behavior: smooth;
 }
 
-body {
-    font-family: Arial, Helvetica, sans-serif;
-    color: var(--texto);
-    background: var(--cinza);
-    line-height: 1.6;
-}
 
 /* =========================
     CABEÇALHO
