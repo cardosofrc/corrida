@@ -148,13 +148,20 @@ formulario.addEventListener(
             }
 
 
+            if (!validarCPF(dados.p_cpf)){
+                throw new Error(
+                    "CPF inválido."
+                );
+            }
+
+
             // -----------------------------------------
             // CHAMADA DA FUNÇÃO SUPABASE
             // -----------------------------------------
 
 
-            if (validarCPF(dados.p_cpf)){
-                 const resposta =
+            //if (validarCPF(dados.p_cpf)){
+                const resposta =
                 await fetch(
                     `${SUPABASE_URL}/rest/v1/rpc/criar_inscricao`,
                     {
@@ -178,11 +185,11 @@ formulario.addEventListener(
                             JSON.stringify(dados)
                     }
                 );
-            } else {
-                throw new Error(
-                    "CPF inválido."
-                );
-            }
+            //} else {
+            //    throw new Error(
+            //        "CPF inválido."
+            //    );
+            //}
 
            
 
