@@ -11,9 +11,9 @@ header {
     position: sticky;
     top: 0;
     z-index: 1000;
-    background: rgba(255, 255, 255, 0.97);
+    background: var(--azul);
     /* background-image: url(/img/fundo.jpeg); */
-    border-bottom: 1px solid #e5e7eb;
+    /* border-bottom: 1px solid #e5e7eb; */
 }
 
 header img{
@@ -24,7 +24,6 @@ header img{
     max-width: 1150px;
     margin: auto;
     padding: 15px 25px;
-
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -37,20 +36,24 @@ header img{
     color: var(--azul-escuro);
 }
 
+.logo p{
+    color: var(--branco);
+}
+
 .logo span {
     color: var(--dourado);
 }
 
 nav a {
     text-decoration: none;
-    color: var(--texto);
+    color: var(--branco);
     font-weight: 700;
     margin-left: 22px;
     font-size: 0.95rem;
 }
 
 nav a:hover {
-    color: var(--azul);
+    color: var(--dourado-claro);
 }
 
 .network{
@@ -109,7 +112,7 @@ nav a:hover {
     max-width: 1150px;
     width: 100%;
     margin: auto;
-    padding: 70px 25px;
+    padding: 25px 25px;
     position: relative;
     z-index: 2;
 }

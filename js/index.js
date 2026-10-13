@@ -198,18 +198,40 @@ formulario.addEventListener(
             // VERIFICA ERRO
             // -----------------------------------------
 
-            if (!resposta.ok) {
+           if (!resposta.ok) {
 
-                const erro =
-                    await resposta.text();
+                const erro = await resposta.text();
 
                 console.error(
                     "Erro Supabase:",
                     erro
                 );
 
+                // CPF já cadastrado: a tabela possui uma restrição UNIQUE.
+                let detalheErro = {};
+                try {
+                    detalheErro = JSON.parse(erro);
+                } catch (_) {
+                    // A resposta pode não estar em formato JSON.
+                }
+
+                const mensagemErro = String(
+                    detalheErro.message || detalheErro.details || erro
+                ).toLowerCase();
+
+                if (
+                    detalheErro.code === "23505" ||
+                    mensagemErro.includes("inscricoes_cpf_key") ||
+                    mensagemErro.includes("duplicate key") ||
+                    mensagemErro.includes("cpf") && mensagemErro.includes("already exists")
+                ) {
+                    throw new Error(
+                        "Este CPF já possui uma inscrição cadastrada. Para consultar seus dados e o status da inscrição, acesse a opção ‘Consultar minha inscrição’. Não é necessário fazer uma nova inscrição."
+                    );
+                }
+
                 throw new Error(
-                    "Erro ao registrar inscrição."
+                    "Não foi possível registrar a inscrição neste momento. Confira os dados e tente novamente."
                 );
             }
 
