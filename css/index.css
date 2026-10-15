@@ -11,7 +11,7 @@ header {
     position: sticky;
     top: 0;
     z-index: 1000;
-    background: var(--azul);
+    background: var(--azul-escuro);
     /* background-image: url(/img/fundo.jpeg); */
     /* border-bottom: 1px solid #e5e7eb; */
 }

@@ -176,6 +176,8 @@
 
         let sessaoAtual = null;
         let inscricoes = [];
+        let ehAdministrador = false;
+        let ehOperadorStatus = false;
 
 
         /* =========================
@@ -263,13 +265,11 @@
                 return;
             }
 
-            try {
-
+            async function consultarPermissao(funcao) {
                 const resposta = await fetch(
-                    `${SUPABASE_URL}/rest/v1/rpc/is_admin`,
+                    `${SUPABASE_URL}/rest/v1/rpc/${funcao}`,
                     {
                         method: "POST",
-
                         headers: {
                             "Content-Type": "application/json",
                             "apikey": SUPABASE_KEY,
@@ -278,29 +278,74 @@
                     }
                 );
 
-                const ehAdmin = await resposta.json();
+                if (!resposta.ok) {
+                    return false;
+                }
 
-                if (!resposta.ok || ehAdmin !== true) {
+                return (await resposta.json()) === true;
+            }
 
+            try {
+                ehAdministrador = await consultarPermissao("is_admin");
+                ehOperadorStatus = await consultarPermissao("pode_alterar_status");
+
+                if (!ehAdministrador && !ehOperadorStatus) {
                     sessionStorage.clear();
-
                     throw new Error(
-                        "Este usuário não possui permissão administrativa."
+                        "Este usuário não possui permissão para acessar o painel."
                     );
                 }
 
+                configurarPainelPorPerfil();
                 mostrarPainel();
 
             } catch (erro) {
-
                 mensagemLogin.textContent = erro.message;
                 mensagemLogin.className = "mensagem erro";
                 mensagemLogin.style.display = "block";
-
                 mostrarLogin();
             }
         }
 
+        function configurarPainelPorPerfil() {
+            const campoBusca = document.getElementById("busca");
+            const cabecalho = document.querySelector("table thead tr");
+            const titulo = document.querySelector("#areaPainel .card h2");
+
+            if (ehOperadorStatus && !ehAdministrador) {
+                if (titulo) {
+                    titulo.textContent = "Inscrições — consulta e atualização de pagamento";
+                }
+
+                campoBusca.placeholder = "Buscar por nome, CPF ou protocolo";
+
+                cabecalho.innerHTML = `
+                    <th>Protocolo</th>
+                    <th>Nome</th>
+                    <th>CPF</th>
+                    <th>Percurso</th>
+                    <th>Camisa</th>
+                    <th>Telefone</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                `;
+            } else {
+                if (titulo) {
+                    titulo.textContent = "Inscrições";
+                }
+                campoBusca.placeholder = "Buscar por nome, CPF ou protocolo";
+                cabecalho.innerHTML = `
+                    <th>Protocolo</th>
+                    <th>Nome</th>
+                    <th>CPF</th>
+                    <th>Percurso</th>
+                    <th>Camisa</th>
+                    <th>Telefone</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                `;
+            }
+        }
 
         /* =========================
            MOSTRAR PAINEL
@@ -341,43 +386,38 @@
             }
 
             try {
+                const operadorRestrito = ehOperadorStatus && !ehAdministrador;
+                const endpoint = operadorRestrito
+                    ? `${SUPABASE_URL}/rest/v1/rpc/listar_inscricoes_status`
+                    : `${SUPABASE_URL}/rest/v1/inscricoes?select=*`;
 
-                const resposta = await fetch(
-                    `${SUPABASE_URL}/rest/v1/inscricoes?select=*`,
-                    {
-                        method: "GET",
-
-                        headers: {
-                            "apikey": SUPABASE_KEY,
-                            "Authorization": `Bearer ${token}`
-                        }
+                const resposta = await fetch(endpoint, {
+                    method: operadorRestrito ? "POST" : "GET",
+                    headers: {
+                        "apikey": SUPABASE_KEY,
+                        "Authorization": `Bearer ${token}`,
+                        "Content-Type": "application/json"
                     }
-                );
+                });
 
                 const dados = await resposta.json();
 
                 if (!resposta.ok) {
-
                     throw new Error(
                         dados.message ||
+                        dados.details ||
                         "Não foi possível carregar as inscrições."
                     );
                 }
 
                 inscricoes = dados;
-
                 atualizarIndicadores();
                 aplicarFiltros();
 
             } catch (erro) {
-
-                mostrarMensagemPainel(
-                    erro.message,
-                    "erro"
-                );
+                mostrarMensagemPainel(erro.message, "erro");
             }
         }
-
 
         /* =========================
            INDICADORES
@@ -452,7 +492,7 @@
                         inscricao.nome
                             .toLowerCase()
                             .includes(busca) ||
-                        inscricao.cpf
+                        (inscricao.cpf || "")
                             .toLowerCase()
                             .includes(busca) ||
                         inscricao.protocolo
@@ -491,7 +531,7 @@
 
                 tabela.innerHTML = `
             <tr>
-                <td colspan="8" style="text-align:center;">
+                <td colspan="${(ehOperadorStatus && !ehAdministrador) ? 7 : 8}" style="text-align:center;">
                     Nenhuma inscrição encontrada.
                 </td>
             </tr>
@@ -524,83 +564,59 @@
                 }
 
 
+                const celulasRestritas = `
+                    <td>${inscricao.protocolo || ""}</td>
+                    <td>${inscricao.nome || ""}</td>
+                    <td>${inscricao.cpf || ""}</td>
+                    <td>${inscricao.percurso || ""}</td>
+                    <td>${inscricao.tamanho_camisa || ""}</td>
+                    <td>${inscricao.telefone || ""}</td>
+                `;
+
+                const celulasAdministrador = `
+                    <td>${inscricao.protocolo || ""}</td>
+                    <td>${inscricao.nome || ""}</td>
+                    <td>${inscricao.cpf || ""}</td>
+                    <td>${inscricao.percurso || ""}</td>
+                    <td>${inscricao.tamanho_camisa || ""}</td>
+                    <td>${inscricao.telefone || ""}</td>
+                `;
+
                 tr.innerHTML = `
-
-            <td>${inscricao.protocolo}</td>
-
-            <td>${inscricao.nome}</td>
-
-            <td>${inscricao.cpf}</td>
-
-            <td>${inscricao.percurso}</td>
-
-            <td>${inscricao.tamanho_camisa}</td>
-
-            <td>${inscricao.telefone}</td>
-
-            <td>
-                <span class="status ${classeStatus}">
-                    ${inscricao.status_pagamento}
-                </span>
-            </td>
-
-            <td>
-
-                ${inscricao.status_pagamento !==
-                        "CONFIRMADO"
-
-                        ? `
-                    <button
-                        class="btn-status btn-confirmar"
-                        onclick="alterarStatus(
-                            '${inscricao.id}',
-                            'CONFIRMADO'
-                        )"
-                    >
-                        Confirmar
-                    </button>
-                    `
-                        : ""
+                    ${ (ehOperadorStatus && !ehAdministrador)
+                        ? celulasRestritas
+                        : celulasAdministrador
                     }
 
+                    <td>
+                        <span class="status ${classeStatus}">
+                            ${inscricao.status_pagamento}
+                        </span>
+                    </td>
 
-                ${inscricao.status_pagamento !==
-                        "PENDENTE"
+                    <td>
+                        ${inscricao.status_pagamento !== "CONFIRMADO" ? `
+                            <button class="btn-status btn-confirmar"
+                                onclick="alterarStatus('${inscricao.id}', 'CONFIRMADO')">
+                                Confirmar
+                            </button>
+                        ` : ""}
 
-                        ? `
-                    <button
-                        class="btn-status btn-pendente"
-                        onclick="alterarStatus(
-                            '${inscricao.id}',
-                            'PENDENTE'
-                        )"
-                    >
-                        Pendente
-                    </button>
-                    `
-                        : ""
-                    }
+                        ${inscricao.status_pagamento !== "PENDENTE" ? `
+                            <button class="btn-status btn-pendente"
+                                onclick="alterarStatus('${inscricao.id}', 'PENDENTE')">
+                                Pendente
+                            </button>
+                        ` : ""}
 
-
-                ${inscricao.status_pagamento !==
-                        "CANCELADO"
-
-                        ? `
-                    <button
-                        class="btn-status btn-cancelar"
-                        onclick="alterarStatus(
-                            '${inscricao.id}',
-                            'CANCELADO'
-                        )"
-                    >
-                        Cancelar
-                    </button>
-                    `
-                        : ""
-                    }
-
-            </td>
-        `;
+                        ${(!(ehOperadorStatus && !ehAdministrador) && inscricao.status_pagamento !== "CANCELADO") ? `
+                            <button class="btn-status btn-cancelar"
+                                onclick="alterarStatus('${inscricao.id}', 'CANCELADO')">
+                                Cancelar
+                            </button>
+                        ` : ""}
+                    </td>
+                `;
 
                 tabela.appendChild(tr);
             });
@@ -632,26 +648,20 @@
             try {
 
                 const resposta = await fetch(
-                    `${SUPABASE_URL}/rest/v1/inscricoes?id=eq.${id}`,
+                    `${SUPABASE_URL}/rest/v1/rpc/alterar_status_inscricao`,
                     {
-                        method: "PATCH",
-
+                        method: "POST",
                         headers: {
                             "apikey": SUPABASE_KEY,
                             "Authorization": `Bearer ${token}`,
-                            "Content-Type":
-                                "application/json",
-                            "Prefer":
-                                "return=minimal"
+                            "Content-Type": "application/json"
                         },
-
                         body: JSON.stringify({
-                            status_pagamento:
-                                novoStatus
+                            p_id: Number(id),
+                            p_novo_status: novoStatus
                         })
                     }
                 );
-
 
                 if (!resposta.ok) {
 
@@ -660,6 +670,7 @@
 
                     throw new Error(
                         erro.message ||
+                        erro.details ||
                         "Não foi possível alterar o status."
                     );
                 }
