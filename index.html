@@ -29,14 +29,19 @@
         <p>1ª Corrida de <span>Nossa Senhora dos Remédios</span></p>
       </div>
 
-      <nav>
-        <a href="#sobre">A Corrida</a>
+      <button class="menu-toggle" type="button" aria-label="Abrir menu" aria-controls="menu-principal" aria-expanded="false">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      <nav id="menu-principal" class="menu-principal">
+        <a href="#inicio">A Corrida</a>
         <a href="#inscricao">Inscrição</a>
         <a href="#pix">Pagamento</a>
+        <a href="consulta.html">Minha inscrição</a>
       </nav>
-
-      <!--Menu mobile-->
-
+    </div>
   </header>
 
   <!-- =========================
@@ -45,7 +50,7 @@
 
   <main>
 
-    <section class="hero">
+    <section class="hero" id="inicio">
       <div class="hero-content">
         <h1>1ª Corrida de <span>Nossa Senhora dos Remédios</span></h1>
 
@@ -307,6 +312,39 @@
   <script>
     $('#telefone').mask('(00) 00000-0000');
     $('#cpf').mask('000.000.000-00', { reverse: true });
+  </script>
+
+  <script>
+    (() => {
+      const botaoMenu = document.querySelector('.menu-toggle');
+      const menu = document.getElementById('menu-principal');
+      if (!botaoMenu || !menu) return;
+
+      const fecharMenu = () => {
+        menu.classList.remove('menu-aberto');
+        botaoMenu.setAttribute('aria-expanded', 'false');
+        botaoMenu.setAttribute('aria-label', 'Abrir menu');
+      };
+
+      botaoMenu.addEventListener('click', () => {
+        const aberto = botaoMenu.getAttribute('aria-expanded') === 'true';
+        botaoMenu.setAttribute('aria-expanded', String(!aberto));
+        botaoMenu.setAttribute('aria-label', aberto ? 'Abrir menu' : 'Fechar menu');
+        menu.classList.toggle('menu-aberto', !aberto);
+      });
+
+      menu.querySelectorAll('a').forEach((link) => {
+        link.addEventListener('click', fecharMenu);
+      });
+
+      document.addEventListener('keydown', (evento) => {
+        if (evento.key === 'Escape') fecharMenu();
+      });
+
+      document.addEventListener('click', (evento) => {
+        if (!menu.contains(evento.target) && !botaoMenu.contains(evento.target)) fecharMenu();
+      });
+    })();
   </script>
 
 </body>

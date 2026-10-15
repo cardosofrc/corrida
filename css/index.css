@@ -459,10 +459,6 @@ footer .gold {
 
 @media (max-width: 850px) {
 
-    nav {
-        display: none;
-    }
-
     .cards {
         grid-template-columns: 1fr 1fr;
     }
@@ -503,5 +499,99 @@ footer .gold {
     .formulario,
     .info-inscricao {
         padding: 25px;
+    }
+}
+
+/* =========================
+   MENU MOBILE
+========================= */
+.menu-toggle {
+    display: none;
+    width: 44px;
+    height: 44px;
+    padding: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 10px;
+    background: transparent;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.menu-toggle span {
+    display: block;
+    height: 3px;
+    width: 100%;
+    margin: 4px 0;
+    border-radius: 3px;
+    background: var(--branco);
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.menu-principal {
+    display: flex;
+    align-items: center;
+    gap: 0;
+}
+
+.menu-principal a {
+    text-decoration: none;
+    color: var(--branco);
+    font-weight: 700;
+    margin-left: 22px;
+    font-size: 0.95rem;
+}
+
+.menu-principal a:hover {
+    color: var(--dourado-claro);
+}
+
+@media (max-width: 850px) {
+    .navbar {
+        position: relative;
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 12px 18px;
+    }
+
+    .logo {
+        flex: 1;
+        min-width: 0;
+        font-size: 1rem;
+        line-height: 1.25;
+    }
+
+    .menu-toggle {
+        display: block;
+    }
+
+    .menu-principal {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        padding: 10px 18px 16px;
+        background: var(--azul-escuro);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.18);
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0;
+    }
+
+    .menu-principal.menu-aberto {
+        display: flex;
+    }
+
+    .menu-principal a {
+        display: block;
+        margin: 0;
+        padding: 13px 8px;
+        border-top: 1px solid rgba(255, 255, 255, 0.12);
+    }
+}
+
+@media (min-width: 851px) {
+    .menu-principal {
+        display: flex !important;
     }
 }
