@@ -12,20 +12,26 @@ const resultado =
     document.getElementById("resultado");
 
 
+function openWhatsApp() {
+    window.open('https://api.whatsapp.com/send/?phone=5586994225846&text=Ol%C3%A1%21+Quero+pagar+a+inscri%C3%A7%C3%A3o+da+1%C2%AA+Corrida+de+Nossa+Senhora+em+esp%C3%A9cie.&type=phone_number&app_absent=0'
+    );
+}
+
+
 function validarCPF(cpf) {
     cpf = cpf.replace(/[^\d]+/g, '');
-    
+
     if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) {
         return false;
     }
-    
+
     let soma = 0;
     let resto;
 
     for (let i = 1; i <= 9; i++) {
         soma = soma + parseInt(cpf.substring(i - 1, i)) * (11 - i);
     }
-    
+
     resto = (soma * 10) % 11;
     if ((resto === 10) || (resto === 11)) {
         resto = 0;
@@ -33,12 +39,12 @@ function validarCPF(cpf) {
     if (resto !== parseInt(cpf.substring(9, 10))) {
         return false;
     }
-    
+
     soma = 0;
     for (let i = 1; i <= 10; i++) {
         soma = soma + parseInt(cpf.substring(i - 1, i)) * (12 - i);
     }
-    
+
     resto = (soma * 10) % 11;
     if ((resto === 10) || (resto === 11)) {
         resto = 0;
@@ -46,7 +52,7 @@ function validarCPF(cpf) {
     if (resto !== parseInt(cpf.substring(10, 11))) {
         return false;
     }
-    
+
     return true;
 }
 
@@ -148,7 +154,7 @@ formulario.addEventListener(
             }
 
 
-            if (!validarCPF(dados.p_cpf)){
+            if (!validarCPF(dados.p_cpf)) {
                 throw new Error(
                     "CPF inválido."
                 );
@@ -161,7 +167,7 @@ formulario.addEventListener(
 
 
             //if (validarCPF(dados.p_cpf)){
-                const resposta =
+            const resposta =
                 await fetch(
                     `${SUPABASE_URL}/rest/v1/rpc/criar_inscricao`,
                     {
@@ -191,14 +197,14 @@ formulario.addEventListener(
             //    );
             //}
 
-           
+
 
 
             // -----------------------------------------
             // VERIFICA ERRO
             // -----------------------------------------
 
-           if (!resposta.ok) {
+            if (!resposta.ok) {
 
                 const erro = await resposta.text();
 
