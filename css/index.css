@@ -432,6 +432,19 @@ select:focus {
     color: #ffffff;
 }
 
+.button_confirm {
+    margin: auto;
+    max-width: 50%;
+    background-color: var(--verde);
+    text-decoration: none;
+    color: white;
+    padding: 10px 0;
+    border-radius: 100px;
+    font-size: 1.0rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
 
 /* =========================

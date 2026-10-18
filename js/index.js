@@ -13,7 +13,7 @@ const resultado =
 
 
 function openWhatsApp() {
-    window.open('https://api.whatsapp.com/send/?phone=5586994225846&text=Ol%C3%A1%21+Quero+pagar+a+inscri%C3%A7%C3%A3o+da+1%C2%AA+Corrida+de+Nossa+Senhora+em+esp%C3%A9cie.&type=phone_number&app_absent=0'
+    window.open('https://api.whatsapp.com/send/?phone=5586994225846&text=Ol%C3%A1%21+Quero+pagar+a+inscri%C3%A7%C3%A3o+da+1%C2%AA+Corrida+de+Nossa+Senhora+dos+Rem%C3%A9dios+em+esp%C3%A9cie.&type=phone_number&app_absent=0'
     );
 }
 
