@@ -327,8 +327,7 @@ formulario.addEventListener(
 
                 <br><br>
 
-                O pagamento PIX será
-                disponibilizado na próxima etapa.
+                Escolha abaixo a forma de pagamento que pode ser por PIX ou em espécie.
 
             `;
 

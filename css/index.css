@@ -17,13 +17,13 @@ header {
 }
 
 header img{
-    width: 20%;
+    width: 10%;
 }
 
 .navbar {
     max-width: 1150px;
     margin: auto;
-    padding: 15px 25px;
+    padding: 5px 10px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -471,6 +471,10 @@ footer .gold {
         ========================== */
 
 @media (max-width: 850px) {
+
+    .logo{
+        visibility: hidden;
+    }
 
     .cards {
         grid-template-columns: 1fr 1fr;

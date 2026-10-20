@@ -1,0 +1,672 @@
+const SUPABASE_URL =
+    "https://bsadzpxcxoeutockphjm.supabase.co";
+
+const SUPABASE_KEY =
+    "sb_publishable_2eNohK0WFyzO2R0Adx9-tg_e_WTPaQv";
+
+
+const areaLogin =
+    document.getElementById("areaLogin");
+
+const areaPainel =
+    document.getElementById("areaPainel");
+
+const mensagemLogin =
+    document.getElementById("mensagemLogin");
+
+const tabela =
+    document.getElementById("tabelaInscricoes");
+
+
+let sessaoAtual = null;
+let inscricoes = [];
+let ehAdministrador = false;
+let ehOperadorStatus = false;
+
+
+/* =========================
+   LOGIN
+========================= */
+
+document
+    .getElementById("formLogin")
+    .addEventListener("submit", async function (event) {
+
+        event.preventDefault();
+
+        mensagemLogin.style.display = "none";
+
+        const email =
+            document.getElementById("email").value.trim();
+
+        const senha =
+            document.getElementById("senha").value;
+
+        try {
+
+            const resposta = await fetch(
+                `${SUPABASE_URL}/auth/v1/token?grant_type=password`,
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json",
+                        "apikey": SUPABASE_KEY
+                    },
+
+                    body: JSON.stringify({
+                        email: email,
+                        password: senha
+                    })
+                }
+            );
+
+            const dados = await resposta.json();
+
+            if (!resposta.ok) {
+                throw new Error(
+                    dados.error_description ||
+                    dados.msg ||
+                    "E-mail ou senha inválidos."
+                );
+            }
+
+            sessaoAtual = dados;
+
+            sessionStorage.setItem(
+                "admin_access_token",
+                dados.access_token
+            );
+
+            sessionStorage.setItem(
+                "admin_refresh_token",
+                dados.refresh_token
+            );
+
+            await verificarAdministrador();
+
+        } catch (erro) {
+
+            mensagemLogin.textContent = erro.message;
+            mensagemLogin.className = "mensagem erro";
+            mensagemLogin.style.display = "block";
+        }
+
+    });
+
+
+/* =========================
+   VERIFICAR ADMIN
+========================= */
+
+async function verificarAdministrador() {
+
+    const token =
+        sessionStorage.getItem("admin_access_token");
+
+    if (!token) {
+        mostrarLogin();
+        return;
+    }
+
+    async function consultarPermissao(funcao) {
+        const resposta = await fetch(
+            `${SUPABASE_URL}/rest/v1/rpc/${funcao}`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "apikey": SUPABASE_KEY,
+                    "Authorization": `Bearer ${token}`
+                }
+            }
+        );
+
+        if (!resposta.ok) {
+            return false;
+        }
+
+        return (await resposta.json()) === true;
+    }
+
+    try {
+        ehAdministrador = await consultarPermissao("is_admin");
+        ehOperadorStatus = await consultarPermissao("pode_alterar_status");
+
+        if (!ehAdministrador && !ehOperadorStatus) {
+            sessionStorage.clear();
+            throw new Error(
+                "Este usuário não possui permissão para acessar o painel."
+            );
+        }
+
+        configurarPainelPorPerfil();
+        mostrarPainel();
+
+    } catch (erro) {
+        mensagemLogin.textContent = erro.message;
+        mensagemLogin.className = "mensagem erro";
+        mensagemLogin.style.display = "block";
+        mostrarLogin();
+    }
+}
+
+function configurarPainelPorPerfil() {
+    const campoBusca = document.getElementById("busca");
+    const cabecalho = document.querySelector("table thead tr");
+    const titulo = document.querySelector("#areaPainel .card h2");
+
+    if (ehOperadorStatus && !ehAdministrador) {
+        if (titulo) {
+            titulo.textContent = "Inscrições — consulta e atualização de pagamento";
+        }
+
+        campoBusca.placeholder = "Buscar por nome, CPF ou protocolo";
+
+        cabecalho.innerHTML = `
+                    <th>Protocolo</th>
+                    <th>Nome</th>
+                    <th>CPF</th>
+                    <th>Percurso</th>
+                    <th>Camisa</th>
+                    <th>Telefone</th>
+                    <th>Comprovante</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                `;
+    } else {
+        if (titulo) {
+            titulo.textContent = "Inscrições";
+        }
+        campoBusca.placeholder = "Buscar por nome, CPF ou protocolo";
+        cabecalho.innerHTML = `
+                    <th>Protocolo</th>
+                    <th>Nome</th>
+                    <th>CPF</th>
+                    <th>Percurso</th>
+                    <th>Camisa</th>
+                    <th>Telefone</th>
+                    <th>Comprovante</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                `;
+    }
+}
+
+/* =========================
+   MOSTRAR PAINEL
+========================= */
+
+function mostrarPainel() {
+
+    areaLogin.style.display = "none";
+    areaPainel.style.display = "block";
+
+    carregarInscricoes();
+}
+
+
+/* =========================
+   MOSTRAR LOGIN
+========================= */
+
+function mostrarLogin() {
+
+    areaLogin.style.display = "block";
+    areaPainel.style.display = "none";
+}
+
+
+/* =========================
+   CARREGAR INSCRIÇÕES
+========================= */
+
+async function carregarInscricoes() {
+
+    const token =
+        sessionStorage.getItem("admin_access_token");
+
+    if (!token) {
+        mostrarLogin();
+        return;
+    }
+
+    try {
+        const operadorRestrito = ehOperadorStatus && !ehAdministrador;
+        const endpoint = operadorRestrito
+            ? `${SUPABASE_URL}/rest/v1/rpc/listar_inscricoes_status`
+            : `${SUPABASE_URL}/rest/v1/inscricoes?select=*`;
+
+        const resposta = await fetch(endpoint, {
+            method: operadorRestrito ? "POST" : "GET",
+            headers: {
+                "apikey": SUPABASE_KEY,
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            }
+        });
+
+        const dados = await resposta.json();
+
+        if (!resposta.ok) {
+            throw new Error(
+                dados.message ||
+                dados.details ||
+                "Não foi possível carregar as inscrições."
+            );
+        }
+
+        inscricoes = dados;
+        atualizarIndicadores();
+        aplicarFiltros();
+
+    } catch (erro) {
+        mostrarMensagemPainel(erro.message, "erro");
+    }
+}
+
+/* =========================
+   INDICADORES
+========================= */
+
+function atualizarIndicadores() {
+
+    document.getElementById(
+        "totalInscricoes"
+    ).textContent = inscricoes.length;
+
+    document.getElementById(
+        "totalPendentes"
+    ).textContent =
+        inscricoes.filter(
+            i => i.status_pagamento === "PENDENTE"
+        ).length;
+
+    document.getElementById(
+        "totalConfirmadas"
+    ).textContent =
+        inscricoes.filter(
+            i => i.status_pagamento === "CONFIRMADO"
+        ).length;
+
+    document.getElementById(
+        "totalCanceladas"
+    ).textContent =
+        inscricoes.filter(
+            i => i.status_pagamento === "CANCELADO"
+        ).length;
+}
+
+
+/* =========================
+   FILTROS
+========================= */
+
+document
+    .getElementById("busca")
+    .addEventListener("input", aplicarFiltros);
+
+document
+    .getElementById("filtroPercurso")
+    .addEventListener("change", aplicarFiltros);
+
+document
+    .getElementById("filtroStatus")
+    .addEventListener("change", aplicarFiltros);
+
+document
+    .getElementById("filtroTamanho")
+    .addEventListener("change", aplicarFiltros);
+
+
+function aplicarFiltros() {
+
+    const busca =
+        document.getElementById("busca")
+            .value
+            .toLowerCase()
+            .trim();
+
+    const percurso =
+        document.getElementById("filtroPercurso").value;
+
+    const status =
+        document.getElementById("filtroStatus").value;
+    
+    const tamanho =
+        document.getElementById("filtroTamanho").value;
+
+
+    const resultado =
+        inscricoes.filter(inscricao => {
+
+            const correspondeBusca =
+                !busca ||
+                inscricao.nome
+                    .toLowerCase()
+                    .includes(busca) ||
+                (inscricao.cpf || "")
+                    .toLowerCase()
+                    .includes(busca) ||
+                inscricao.protocolo
+                    .toLowerCase()
+                    .includes(busca);
+
+            const correspondePercurso =
+                !percurso ||
+                inscricao.percurso === percurso;
+
+            const correspondeStatus =
+                !status ||
+                inscricao.status_pagamento === status;
+            
+            const correspondeTamanho =
+                !tamanho ||
+                inscricao.tamanho_camisa === tamanho;
+
+            return (
+                correspondeBusca &&
+                correspondePercurso &&
+                correspondeStatus &&
+                correspondeTamanho
+            );
+
+        });
+
+    renderizarTabela(resultado);
+}
+
+
+/* =========================
+   TABELA
+========================= */
+
+function renderizarTabela(lista) {
+
+    tabela.innerHTML = "";
+
+    if (lista.length === 0) {
+
+        tabela.innerHTML = `
+            <tr>
+                <td colspan="9" style="text-align:center;">
+                    Nenhuma inscrição encontrada.
+                </td>
+            </tr>
+        `;
+
+        return;
+    }
+
+
+    lista.forEach(inscricao => {
+
+        const tr =
+            document.createElement("tr");
+
+        let classeStatus =
+            "pendente";
+
+        if (
+            inscricao.status_pagamento ===
+            "CONFIRMADO"
+        ) {
+            classeStatus = "confirmado";
+        }
+
+        if (
+            inscricao.status_pagamento ===
+            "CANCELADO"
+        ) {
+            classeStatus = "cancelado";
+        }
+
+
+        const celulasRestritas = `
+                    <td>${inscricao.protocolo || ""}</td>
+                    <td>${inscricao.nome || ""}</td>
+                    <td>${inscricao.cpf || ""}</td>
+                    <td>${inscricao.percurso || ""}</td>
+                    <td>${inscricao.tamanho_camisa || ""}</td>
+                    <td>${inscricao.telefone || ""}</td>
+                `;
+
+        const celulasAdministrador = `
+                    <td>${inscricao.protocolo || ""}</td>
+                    <td>${inscricao.nome || ""}</td>
+                    <td>${inscricao.cpf || ""}</td>
+                    <td>${inscricao.percurso || ""}</td>
+                    <td>${inscricao.tamanho_camisa || ""}</td>
+                    <td>${inscricao.telefone || ""}</td>
+                `;
+
+        tr.innerHTML = `
+                    ${(ehOperadorStatus && !ehAdministrador)
+                ? celulasRestritas
+                : celulasAdministrador
+            }
+
+                    <td>
+                        ${inscricao.comprovante_url ? `
+                            <button class="btn-status btn-confirmar"
+                                onclick="abrirComprovante('${encodeURIComponent(inscricao.comprovante_url)}')">
+                                Baixar comprovante
+                            </button>
+                        ` : `<span style="color:#777;">Não enviado</span>`}
+                    </td>
+
+                    <td>
+                        <span class="status ${classeStatus}">
+                            ${inscricao.status_pagamento}
+                        </span>
+                    </td>
+
+                    <td>
+                        ${inscricao.status_pagamento !== "CONFIRMADO" ? `
+                            <button class="btn-status btn-confirmar"
+                                onclick="alterarStatus('${inscricao.id}', 'CONFIRMADO')">
+                                Confirmar
+                            </button>
+                        ` : ""}
+
+                        ${inscricao.status_pagamento !== "PENDENTE" ? `
+                            <button class="btn-status btn-pendente"
+                                onclick="alterarStatus('${inscricao.id}', 'PENDENTE')">
+                                Pendente
+                            </button>
+                        ` : ""}
+
+                        ${(!(ehOperadorStatus && !ehAdministrador) && inscricao.status_pagamento !== "CANCELADO") ? `
+                            <button class="btn-status btn-cancelar"
+                                onclick="alterarStatus('${inscricao.id}', 'CANCELADO')">
+                                Cancelar
+                            </button>
+                        ` : ""}
+                    </td>
+                `;
+
+        tabela.appendChild(tr);
+    });
+}
+
+
+/* =========================
+   ABRIR COMPROVANTE (URL TEMPORÁRIA)
+========================= */
+
+async function abrirComprovante(valorCodificado) {
+    const token = sessionStorage.getItem("admin_access_token");
+    const novaAba = window.open("about:blank", "_blank");
+
+    try {
+        if (!token) throw new Error("Sua sessão expirou. Entre novamente.");
+
+        let caminho = decodeURIComponent(valorCodificado || "").trim();
+        if (!caminho) throw new Error("Esta inscrição ainda não possui comprovante.");
+
+        // Aceita tanto o caminho do objeto quanto uma URL antiga do mesmo bucket.
+        const marcadores = [
+            "/object/public/comprovantes-pix/",
+            "/object/sign/comprovantes-pix/",
+            "/object/authenticated/comprovantes-pix/"
+        ];
+        for (const marcador of marcadores) {
+            const pos = caminho.indexOf(marcador);
+            if (pos >= 0) {
+                caminho = caminho.slice(pos + marcador.length);
+                break;
+            }
+        }
+        caminho = caminho.replace(/^comprovantes-pix\//, "").replace(/^\/+/, "");
+        const caminhoCodificado = caminho.split("/").map(encodeURIComponent).join("/");
+
+        const resposta = await fetch(
+            `${SUPABASE_URL}/storage/v1/object/sign/comprovantes-pix/${caminhoCodificado}`,
+            {
+                method: "POST",
+                headers: {
+                    "apikey": SUPABASE_KEY,
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ expiresIn: 60 })
+            }
+        );
+
+        const resultado = await resposta.json().catch(() => ({}));
+        if (!resposta.ok) {
+            throw new Error(resultado.message || resultado.error ||
+                "Não foi possível gerar o link do comprovante. Verifique as permissões do bucket.");
+        }
+
+        let url = resultado.signedURL || resultado.signedUrl;
+        if (!url) throw new Error("O Supabase não retornou o link do comprovante.");
+        if (url.startsWith("/")) url = `${SUPABASE_URL}/storage/v1${url}`;
+        else if (!/^https?:\/\//i.test(url)) url = `${SUPABASE_URL}/storage/v1/${url.replace(/^\/+/, "")}`;
+
+        if (novaAba) novaAba.location.href = url;
+        else window.location.href = url;
+    } catch (erro) {
+        if (novaAba) novaAba.close();
+        mostrarMensagemPainel(erro.message || "Erro ao abrir comprovante.", "erro");
+    }
+}
+
+
+/* =========================
+   ALTERAR STATUS
+========================= */
+
+async function alterarStatus(id, novoStatus) {
+
+    const confirmacao =
+        confirm(
+            `Deseja realmente alterar o status para ${novoStatus}?`
+        );
+
+    if (!confirmacao) {
+        return;
+    }
+
+
+    const token =
+        sessionStorage.getItem(
+            "admin_access_token"
+        );
+
+
+    try {
+
+        const resposta = await fetch(
+            `${SUPABASE_URL}/rest/v1/rpc/alterar_status_inscricao`,
+            {
+                method: "POST",
+                headers: {
+                    "apikey": SUPABASE_KEY,
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    p_id: Number(id),
+                    p_novo_status: novoStatus
+                })
+            }
+        );
+
+        if (!resposta.ok) {
+
+            const erro =
+                await resposta.json();
+
+            throw new Error(
+                erro.message ||
+                erro.details ||
+                "Não foi possível alterar o status."
+            );
+        }
+
+
+        await carregarInscricoes();
+
+        mostrarMensagemPainel(
+            "Status atualizado com sucesso.",
+            "sucesso"
+        );
+
+    } catch (erro) {
+
+        mostrarMensagemPainel(
+            erro.message,
+            "erro"
+        );
+    }
+}
+
+
+/* =========================
+   MENSAGENS
+========================= */
+
+function mostrarMensagemPainel(
+    texto,
+    tipo
+) {
+
+    const elemento =
+        document.getElementById(
+            "mensagemPainel"
+        );
+
+    elemento.textContent = texto;
+
+    elemento.className =
+        `mensagem ${tipo}`;
+
+    elemento.style.display = "block";
+
+    setTimeout(() => {
+        elemento.style.display = "none";
+    }, 4000);
+}
+
+
+/* =========================
+   SAIR
+========================= */
+
+document
+    .getElementById("btnSair")
+    .addEventListener("click", function () {
+
+        sessionStorage.clear();
+
+        mostrarLogin();
+
+    });
+
+
+/* =========================
+   VERIFICAR SESSÃO AO ABRIR
+========================= */
+
+verificarAdministrador();
