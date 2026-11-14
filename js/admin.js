@@ -166,6 +166,7 @@ function configurarPainelPorPerfil() {
         cabecalho.innerHTML = `
                     <th>Protocolo</th>
                     <th>Nome</th>
+                    <th>Categoria</th>
                     <th>CPF</th>
                     <th>Percurso</th>
                     <th>Camisa</th>
@@ -182,6 +183,7 @@ function configurarPainelPorPerfil() {
         cabecalho.innerHTML = `
                     <th>Protocolo</th>
                     <th>Nome</th>
+                    <th>Categoria</th>
                     <th>CPF</th>
                     <th>Percurso</th>
                     <th>Camisa</th>
@@ -307,6 +309,10 @@ document
     .addEventListener("input", aplicarFiltros);
 
 document
+    .getElementById("filtroCategoria")
+    .addEventListener("change", aplicarFiltros);
+
+document
     .getElementById("filtroPercurso")
     .addEventListener("change", aplicarFiltros);
 
@@ -327,6 +333,9 @@ function aplicarFiltros() {
             .toLowerCase()
             .trim();
 
+    const categoria = 
+        document.getElementById("filtroCategoria").value;
+    
     const percurso =
         document.getElementById("filtroPercurso").value;
 
@@ -352,6 +361,10 @@ function aplicarFiltros() {
                     .toLowerCase()
                     .includes(busca);
 
+            const correspondeCategoria = 
+                !categoria || 
+                inscricao.sexo == categoria;
+            
             const correspondePercurso =
                 !percurso ||
                 inscricao.percurso === percurso;
@@ -365,6 +378,7 @@ function aplicarFiltros() {
                 inscricao.tamanho_camisa === tamanho;
 
             return (
+                correspondeCategoria &&
                 correspondeBusca &&
                 correspondePercurso &&
                 correspondeStatus &&
@@ -425,6 +439,7 @@ function renderizarTabela(lista) {
         const celulasRestritas = `
                     <td>${inscricao.protocolo || ""}</td>
                     <td>${inscricao.nome || ""}</td>
+                    <td>${inscricao.sexo || ""}</td>
                     <td>${inscricao.cpf || ""}</td>
                     <td>${inscricao.percurso || ""}</td>
                     <td>${inscricao.tamanho_camisa || ""}</td>
@@ -434,6 +449,7 @@ function renderizarTabela(lista) {
         const celulasAdministrador = `
                     <td>${inscricao.protocolo || ""}</td>
                     <td>${inscricao.nome || ""}</td>
+                    <td>${inscricao.sexo || ""}</td>
                     <td>${inscricao.cpf || ""}</td>
                     <td>${inscricao.percurso || ""}</td>
                     <td>${inscricao.tamanho_camisa || ""}</td>
