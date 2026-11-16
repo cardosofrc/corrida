@@ -297,6 +297,34 @@ function atualizarIndicadores() {
         inscricoes.filter(
             i => i.status_pagamento === "CANCELADO"
         ).length;
+    
+    document.getElementById(
+        "camisaP"
+    ).textContent = 
+        inscricoes.filter(
+            i => i.tamanho_camisa === "P"
+        ).length;
+    
+    document.getElementById(
+        "camisaM"
+    ).textContent = 
+        inscricoes.filter(
+            i => i.tamanho_camisa === "M"
+        ).length;
+    
+    document.getElementById(
+        "camisaG"
+    ).textContent = 
+        inscricoes.filter(
+            i => i.tamanho_camisa === "G"
+        ).length;
+
+    document.getElementById(
+        "camisaGG"
+    ).textContent = 
+        inscricoes.filter(
+            i => i.tamanho_camisa === "GG"
+        ).length;
 }
 
 
